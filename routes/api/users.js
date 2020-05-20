@@ -3,6 +3,7 @@ const router=express.Router();
 const { poolPromise } = require('../../config/db')  
 const sql = require('mssql')  
 const bcrypt = require ('bcryptjs');
+const createError = require('http-errors')
 const {check, validationResult} = require('express-validator')
 
 
@@ -21,12 +22,12 @@ router.post('/',[
    .withMessage('Password should not be empty, minimum five characters, maximum eight charachters , at least one number and one special character')
    .isLength({ min: 5 },{max:10})
    .withMessage('Password should not be empty, minimum five characters, maximum eight charachters , at least one number and one special character')
-   .matches(/^[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]*$/)
+   .matches(/.*[0-9]+.*[\\\^\$\.\|\?\*\+\(\)\[\]\{]+/)
    .withMessage('Password should not be empty, minimum five characters, maximum eight charachters , at least one number and one special character'),
     check('email', 'Please include a valid e-mail').isEmail(),
     check('url', 'must conatin valid url').isURL()
     ],
-     async (req,res)=>  {  
+     async (req,res,next)=>  {  
     try{
         const errors = validationResult(req)
         if(!errors.isEmpty()){
@@ -53,7 +54,7 @@ router.post('/',[
         .query('select * from users',function(err, users){  
             if (err)  
             {    
-           console.log(err)
+               next(error)
             }  
             else {  
             let data = users.recordset;  
@@ -61,12 +62,12 @@ router.post('/',[
 
             //UserName taken
             if(usernameInUse){ 
-                duplicateUserName=true
+                next(createError(404,'User already exists'))
             }
             //Email taken
             emailInUse = data.some((user) => {return user.email===email})
             if(emailInUse){
-               duplicateEmail=true;
+                next(createError(404,'Email already exists'))
              }
             }  
         }
@@ -87,16 +88,7 @@ router.post('/',[
     
     }
     catch(error){
-        console.log(error.message)
-        if(duplicateUserName)
-        {
-           return res.status(404).send('Duplicate Username'); 
-        }
-        if(duplicateEmail)
-        {
-            return res.status(404).send('Duplicate Email'); 
-        }
-            res.status(500).send('Server error');
+            next(error);
     }
 
       

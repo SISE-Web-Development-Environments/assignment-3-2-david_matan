@@ -26,6 +26,12 @@ app.use('/api/auth', require('./routes/api/auth'))
 app.use('/api/recipes', require('./routes/api/recipes'))
 app.use('/api/profiles', require('./routes/api/profiles'))
 
+
+app.use(function (err, req, res, next) {
+  console.error(err.status);
+  res.status(err.status || 500).send({ message: err.message, success: false });
+});
+
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT , () => console.log(`Sever started on port ${PORT}`));

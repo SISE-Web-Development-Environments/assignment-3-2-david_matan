@@ -7,31 +7,84 @@ const {check, validationResult} = require('express-validator')
 const auth = require('../../middlewares/auth');
 const axios = require("axios");
 const api_domain = "https://api.spoonacular.com/recipes";
+const createError = require('http-errors')
+
+
+//@route GET/api/recipes 
+//@desc get all users recipes
+//@access Private
+router.get('/',auth, async function(req,res,next){
+  try {
+
+    pool = await poolPromise  
+    result = await pool.request()
+  .query(`select * from recipes where username =  '${req.user}'`,async function(err, userecipes){  
+      if (err){
+      next(err)
+      }
+      console.log(userecipes)
+      recipes=userecipes.recordset;
+      console.log(recipes)
+      res.status(200).send({recipes});
+
+    }) 
+     } catch (err) {
+      next(err);
+    }
+  });
+
+
+//@route GET/api/recipes/userecipe
+//@desc get information about spesific recipe from user private recipes
+//@access Private
+  router.get('/userecipe/:id',auth, async function(req,res,next){
+    try {
+
+      pool = await poolPromise  
+      result = await pool.request()
+    .query(`select * from recipes where id=  '${req.params.id}'`,async function(err, recipe){  
+        if (err){
+        next(err)
+        }
+      recipe=JSON.parse(recipe.recordset[0]);
+      //Save the recipe in user watched history recipes
+      updateLastWatchRecipe(req.user,req.params.id)
+      //Save the recipe in lastWatched recipes
+      updateWatchHistoryRecipes(req.user,req.params.id)
+      res.status(200).send(recipe)
+      })
+    } 
+      catch (err) {
+        next(err);
+      }
+    });
+
+
 
 
 //@route POST/api/recipes 
 //@desc create new recipe of user
 //@access Private
-
 router.post('/',auth, [
 check('name', 'first name must be not empty').not().isEmpty(),
-check('img', 'img must be not empty').not().isEmpty(),
+check('image', 'img must be not empty').not().isEmpty(),
 check('time', 'time must be not empty and integer').not().isEmpty().isInt(),
 check('isGluten', 'time must be not empty and boolean').not().isEmpty().isBoolean(),
 check('isVegaterian', 'time must be not empty and boolean').not().isEmpty().isBoolean(),
 check('ingredients', 'ingredients must be not null').not().isEmpty(),
+check('totalAmount', 'totalAmount must be not null').not().isEmpty(),
 check('instructions', 'instructions must be not null').not().isEmpty()
 ], async function(req,res,next){
 try{
-    
+
     const errors = validationResult(req)
     if(!errors.isEmpty()){
         return res.status(400).json({ errors: errors.array() });
     }
     //Generate uniqe id for recipe
     const id=uniqid();
-    const {name,img,time,isGluten,isVegeterian,ingredients,instructions} = req.body
-
+    const {name,image,time,isGluten,isVegaterian,ingredients,instructions,totalAmount} = req.body
+    console.log(isGluten==='true')
 
     //Add new recipe to DB
     pool = await poolPromise  
@@ -39,22 +92,22 @@ try{
    .input("id",sql.VarChar(4000), id)
    .input("username",sql.VarChar(10), req.session.userId)
    .input("name",sql.VarChar(4000), name)
-   .input("img",sql.VarChar(4000), img)
+   .input("image",sql.VarChar(4000), image)
    .input("time",sql.BigInt, time)
    .input("likes",sql.BigInt,0)
-   .input("isGluten", sql.Bit, + isGluten)
-   .input("isVegaterian", sql.Bit, + isVegeterian)
-   .input("ingredients", sql.NVarChar('max'), ingredients)
-   .input("instructions", sql.NVarChar('max'), instructions)
+   .input("isGluten", sql.Bit,isGluten==='true' ? 1 : 0)
+   .input("isVegaterian", sql.Bit,isVegaterian==='true' ? 1 : 0)
+   .input("ingredients", sql.NVarChar('max'), JSON.stringify(ingredients))
+   .input("instructions", sql.NVarChar('max'), JSON.stringify(instructions))
+   .input("totalAmount", sql.NVarChar('max'), totalAmount)
    .execute("insertRecipe").then(function (recordSet){
-    res.send({msg: recordSet})
+    res.status(200).send({message: 'Success', sucess: 'true'})
    })  
     
 }
 catch(err)
 {
-    console.log(err.message)
-    res.status(500).json('Server Error')
+  next(err)
 }
 
 
@@ -76,10 +129,9 @@ router.get('/random',auth, async function(req,res,next){
         });
     
         let randomRecipes = get_random.data.recipes.map((recipe_raw) => createRecipe(recipe_raw,req.user))
-        res.send({ randomRecipes});
+        res.status(200).send({randomRecipes});
       } catch (err) {
-        console.log(err.message)
-        res.status(500).send('Server error');
+        next(err);
       }
     });
 
@@ -114,7 +166,7 @@ router.get("/search", auth, async function(req,res,next) {
         //if 0 results
         if(recipes.length===0)
         {
-        res.status(404).send('No Results found')
+          next(createError(404,'No results found'))
         }
 
 
@@ -122,8 +174,7 @@ router.get("/search", auth, async function(req,res,next) {
         recipes.map((recipe) => convertedRecipes.push(createRecipe(recipe.data)));
         res.send(convertedRecipes);
     } catch (err) {
-      console.log(err.message)
-      res.status(500).send('Server error');
+      next(err)
     }
     });
     
@@ -211,7 +262,7 @@ router.get('/:id',auth, async function(req,res,next){
       }
 
       userHistory=JSON.parse("["+user.recordset[0].watchedRecipe+"]");
-      recipeNotWatched = userHistory.some(id => { id===recipeid}) //check if already saved in history , continue
+      recipeNotWatched = userHistory.some(id => {return (id.toString()===recipeid.toString())}) //check if already saved in history , continue
   
       if(!recipeNotWatched){
        userHistory.push(recipeid)
