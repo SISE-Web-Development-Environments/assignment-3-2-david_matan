@@ -30,7 +30,7 @@ app.use('/api/profiles', require('./routes/api/profiles'))
 //Catch all
 app.use(function (err, req, res, next) {
   console.error(err.status);
-  res.status(err.status || 500).send({ message: err.message, success: false });
+  return res.status(err.status || 500).send({ message: err.message, success: false });
 });
 
 const PORT = process.env.PORT || 3000;

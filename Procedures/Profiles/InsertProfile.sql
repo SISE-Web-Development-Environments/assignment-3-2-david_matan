@@ -4,7 +4,7 @@ GO
 CREATE procedure [dbo].[insertProfile]  
 (  
 @username varchar(10),
-@watchedRecipe varchar(max),
+@watchedRecipe varchar(4000),
 @favoriteRecipe varchar(4000), 
 @familyRecipe varchar(4000),
 @lastWatched varchar(4000)

@@ -20,7 +20,7 @@ CREATE procedure [dbo].[insertFamilyRecipe]
 )  
 AS  
 BEGIN  
-insert into recipes (id,username,name,image,time,likes,isGluten,isVegaterian,belongs,wichtime,generations,ingredients,instructions,totalamount) values( @id,@username,@name,@image,@time,@likes,@isGluten,@isVegaterian,@belongs,@wichtime,@generations,@ingredients,@instructions,@totalamount)  
+insert into familyrecipes(id,username,name,image,time,likes,isGluten,isVegaterian,belongs,wichtime,generations,ingredients,instructions,totalamount) values( @id,@username,@name,@image,@time,@likes,@isGluten,@isVegaterian,@belongs,@wichtime,@generations,@ingredients,@instructions,@totalamount)  
 END  
 
 

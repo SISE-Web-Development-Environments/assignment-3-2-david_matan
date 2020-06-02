@@ -5,6 +5,7 @@ const sql = require('mssql')
 const bcrypt = require ('bcryptjs');
 const {check, validationResult} = require('express-validator')
 const createError = require('http-errors')
+const auth = require('../../middlewares/auth');
 
 //@route POST/api/auth 
 //@desc Log in user
@@ -24,18 +25,20 @@ router.post('/',[
         .query(`select * from users where username = '${username}'`, async function(err, result) {  
             user=result.recordset[0]
             if (err) 
-               next(err)
-            if(!user)
-               next(createError(400, {msg: 'Invalid Credentials'}));
+             return next(err)
+            if(result.recordset.length === 0)
+             return  next(createError(400,'Username is not exists'));
 
             // encrypt user password and validate
             else{
             const isMatch = await bcrypt.compare(password,user.password);
-            if(!isMatch)
-              next(createError(400, {msg: 'Invalid Credentials', success:'false' }));
+            console.log(isMatch)
 
+            if(!isMatch)
+             return next(createError(400, 'Password incorrect'));
+            
             req.session.userId = username;
-            res.status(200).json({msg: res.headers})
+            res.status(200).json('Success')
             }
             })   
     }
@@ -43,5 +46,20 @@ router.post('/',[
         next(error)
     }
     })
+
+
+//@route GET/api/auth 
+//@desc Log out user
+//@access private
+router.get('/',auth, (req,res,next)=>  {  
+    try{
+        req.session.reset();
+        res.status(200).json({message : "Successfully logout" , success : 'True'})
+    }
+    catch(error){
+        next(error)
+    }
+    })
+
 
     module.exports = router;

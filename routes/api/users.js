@@ -48,21 +48,21 @@ router.post('/',[
         //Check if user exists
         var pool = await poolPromise  
         var result = await pool.request()
-        .query('select * from users',async function(err, users){  
+        .query('select * from users',async function(err, users){ 
           if (err)   
-            next(err)
-
+            return next(err)
+         
           let data = users.recordset;  
           let usernameInUse = data.some(user => {return user.username===username})
 
             //UserName taken
            if(usernameInUse)
-                next(createError(404,'User already exists'))
+               return next(createError(404,'User already exists'))
             
             //Email taken
             emailInUse = data.some((user) => {return user.email===email})
             if(emailInUse)
-                next(createError(404,'Email already exists'))
+                return next(createError(404,'Email already exists'))
              
             await pool.request()
              .input("username",sql.VarChar(10), username)
@@ -72,10 +72,18 @@ router.post('/',[
              .input("password",sql.VarChar('max'),cryptpassword)
              .input("email", sql.VarChar('4000'),email)
              .input("url", sql.VarChar('max'),url)
-             .execute("insertUser").then(function (recordSet){
-              res.send({msg: 'Success, redirect to login'})
-             })
-        })
+             .execute("insertUser").then(async function (recordSet){
+                 await pool.request()
+                .input("username",sql.VarChar(10), username)
+                .input("watchedRecipe",sql.VarChar('max'),[])
+                .input("favoriteRecipe",sql.VarChar(4000), [])
+                .input("familyRecipe",sql.VarChar(4000), [])
+                .input("lastWatched",sql.VarChar(4000), [])
+                .execute("insertProfile").then(function (recordSet){
+                    return res.status(200).json({msg: 'New User and profile creatred', success: 'true'})
+                })  
+            })
+       })
     }
     catch(error){
         next(error);

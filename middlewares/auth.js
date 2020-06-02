@@ -3,7 +3,6 @@ const sql = require('mssql')
 
 module.exports = async (req,res,next) => {
 //Check if seassion exists
-console.log(req.session)
 if(!(req.session && req.session.userId)){
 
     return res.status(401).json({msg: 'No session, authorization denied'});
@@ -29,4 +28,5 @@ if(!(req.session && req.session.userId)){
      next();
     });  
 }
+
 

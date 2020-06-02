@@ -5,9 +5,11 @@ const uniqid = require('uniqid');
 const sql = require('mssql')  
 const {check, validationResult} = require('express-validator')
 const auth = require('../../middlewares/auth');
-const axios = require("axios");
 const api_domain = "https://api.spoonacular.com/recipes";
 const createError = require('http-errors')
+const axios = require("axios");
+const recipes_actions = require('../utils/recipes_actions')
+const  update_watch = require('../utils/update_watch')
 
 
 //@route GET/api/recipes 
@@ -21,11 +23,13 @@ router.get('/',auth, async function(req,res,next){
       if (err)
         next(err)
       //get Recipes from database
+     if(user.recordset.length === 0)
+      next(createError('404','User doesnt exists'))
       recipes=userecipes.recordset;
       res.status(200).send({recipes});
 
     }) 
-     }
+  }
   catch (err){
     next(err);
   }
@@ -41,13 +45,18 @@ router.get('/userecipe/:id',auth, async function(req,res,next){
     result = await pool.request()
     .query(`select * from recipes where id=  '${req.params.id}'`,async function(err, recipe){  
       if (err){
-      next(err)
+       next(err)
       }
-    recipe=JSON.parse(recipe.recordset[0]);
+
+      if(recipe.recordset.length === 0)
+       next(createError('404','Recipe doesnt exists'))
+
+    recipe=recipe.recordset[0];
+
     //Save the recipe in user watched history recipes
-    updateLastWatchRecipe(req.user,req.params.id)
+    update_watch.updateLastWatchRecipe(req.user,req.params.id,next)
     //Save the recipe in lastWatched recipes
-    updateWatchHistoryRecipes(req.user,req.params.id)
+    update_watch.updateWatchHistoryRecipes(req.user,req.params.id,next)
     res.status(200).send(recipe)
     })
   } 
@@ -66,13 +75,17 @@ router.get('/familyrecipe/:id',auth, async function(req,res,next){
     result = await pool.request()
     .query(`select * from familyrecipes where id=  '${req.params.id}'`,async function(err, recipe){  
         if (err){
-        next(err)
+          next(err)
         }
-      recipe=JSON.parse(recipe.recordset[0]);
+        console.log()
+        if(recipe.recordset.length === 0)
+          next(createError('404','Recipe doesnt exists'))
+
+      recipe=recipe.recordset[0];
       //Save the recipe in user watched history recipes
-      updateLastWatchRecipe(req.user,req.params.id)
+      update_watch.updateLastWatchRecipe(req.user,req.params.id,next)
       //Save the recipe in lastWatched recipes
-      updateWatchHistoryRecipes(req.user,req.params.id)
+      update_watch.updateWatchHistoryRecipes(req.user,req.params.id,next)
       res.status(200).send(recipe)
       })
   } 
@@ -93,6 +106,10 @@ router.get('/familyrecipe/',auth, async function(req,res,next){
       if (err)
         next(err)
       //Get fanilyRecipe from familyrecipe table
+      
+      if(userecipes.recordset.length === 0)
+        next(createError('404','Recipes doesnt exists'))
+
       recipes=userecipes.recordset;
       res.status(200).send({recipes});
       })
@@ -115,7 +132,7 @@ check('isVegaterian', 'isVegaterian must be not empty and boolean').not().isEmpt
 check('belongs', 'belongs must contain at leat 1 family member').not().isEmpty(),
 check('wichtime', 'wichtime must be not empty').not().isEmpty(),
 check('ingredients', 'ingredients must be not null').not().isEmpty(),
-check('totalamount', 'totalAmount must be not null').not().isEmpty(),
+check('totalamount', 'totalamount must be not null').not().isEmpty(),
 check('instructions', 'instructions must be not null').not().isEmpty()
 ], async function(req,res,next){
   try{
@@ -126,7 +143,19 @@ check('instructions', 'instructions must be not null').not().isEmpty()
       //Generate uniqe id for recipe
       const id=uniqid();
 
-      const {name,image,time,isGluten,isVegaterian,ingredients,instructions,totalamount,wichtime,belongs} = req.body
+      const {
+        name,
+        image,
+        time,
+        isGluten,
+        isVegaterian,
+        ingredients,
+        instructions,
+        totalamount,
+        wichtime,
+        belongs,
+        generations
+      } = req.body
 
       //Add new recipe to DB
       pool = await poolPromise  
@@ -141,10 +170,11 @@ check('instructions', 'instructions must be not null').not().isEmpty()
       .input("isVegaterian", sql.Bit,isVegaterian==='true' ? 1 : 0)
       .input("belongs",sql.VarChar(4000), belongs)
       .input("wichtime",sql.VarChar(4000), wichtime)
+      .input("generations",sql.Int,generations)
       .input("ingredients", sql.NVarChar('max'), JSON.stringify(ingredients))
       .input("instructions", sql.NVarChar('max'), JSON.stringify(instructions))
       .input("totalamount", sql.NVarChar('max'), totalamount)
-      .execute("insertRecipe").then(function (recordSet){
+      .execute("insertFamilyRecipe").then(function (recordSet){
       res.status(200).send({message: 'Success', sucess: 'true'})
       })  
   }
@@ -174,7 +204,16 @@ check('instructions', 'instructions must be not null').not().isEmpty()
     //Generate uniqe id for recipe
     const id=uniqid();
 
-    const {name,image,time,isGluten,isVegaterian,ingredients,instructions,totalAmount} = req.body
+    const {
+      name,
+      image,
+      time,
+      isGluten,
+      isVegaterian,
+      ingredients,
+      instructions,
+      totalAmount
+    } = req.body
 
     //Add new recipe to DB
     pool = await poolPromise  
@@ -202,18 +241,21 @@ check('instructions', 'instructions must be not null').not().isEmpty()
 
 
 //@route GET/api/recipes/random 
-//@desc get 3 random recipies
+//@desc get 3 random preview recipies
 //@access Private
 router.get('/random',auth, async function(req,res,next){
   try {
-    const get_random = await axios.get(`${api_domain}/random`, {
-      params: {
-        number: 3,
-        apiKey: process.env.spooncular_API
-      }
-    });
-    
-    let randomRecipes = get_random.data.recipes.map((recipe_raw) => createRecipe(recipe_raw,req.user))
+      let instructionsEmpty=true;
+      while(instructionsEmpty){
+      var get_random = await axios.get(`${api_domain}/random`, {
+        params: {
+          number: 3,
+          apiKey: process.env.spooncular_API
+        }
+      });
+      instructionsEmpty = get_random.data.recipes.some((recipe_raw) => recipe_raw==='')
+    }
+    let randomRecipes = get_random.data.recipes.map((recipe_raw) => recipes_actions.createPreviewRecipe(recipe_raw))
     res.status(200).send({randomRecipes});
     } 
     catch (err){
@@ -243,16 +285,16 @@ router.get("/search", auth, async function(req,res,next) {
 
     let recipes = await Promise.all(
     search_response.data.results.map((recipe_raw) =>
-        getRecipeInfo(recipe_raw.id)
+    recipes_actions.getRecipeInfo(recipe_raw.id)
     ));
 
     //if 0 results
     if(recipes.length===0)
-      next(createError(404,'No results found'))
+      return next(createError(404,'No results found'))
     
     //Convert to my pattern
     let convertedRecipes=[];
-    recipes.map((recipe) => convertedRecipes.push(createRecipe(recipe.data)));
+    recipes.map((recipe) => convertedRecipes.push(recipes_actions.createPreviewRecipe(recipe.data)));
     res.send(convertedRecipes);
     } 
   catch (err) {
@@ -267,13 +309,13 @@ router.get("/search", auth, async function(req,res,next) {
 //@access Private
 router.get('/:id',auth, async function(req,res,next){
   try {
-    const get_information= await getRecipeInfo(req.params.id)
-    let reqRecipe = createRecipe(get_information.data,req.user)
+    const get_information= await recipes_actions.getRecipeInfo(req.params.id)
+    let reqRecipe =recipes_actions.createRecipe(get_information.data,'SpooncularApi')
    
     //Save the recipe in user watched history recipes
-    updateLastWatchRecipe(req.user,req.params.id)
+    update_watch.updateLastWatchRecipe(req.user,req.params.id,next)
     //Save the recipe in lastWatched recipes
-    updateWatchHistoryRecipes(req.user,req.params.id)
+    update_watch.updateWatchHistoryRecipes(req.user,req.params.id,next)
 
     res.send(reqRecipe)
     
@@ -282,106 +324,6 @@ router.get('/:id',auth, async function(req,res,next){
      next(err)
   }
 });
-
-
-
-  //Get information of spesific reice
-  //@ id - id of recipe
-function getRecipeInfo(id) {
-  return axios.get(`${api_domain}/${id}/information`, {
-    params: {
-    includeNutrition: false,
-    apiKey: process.env.spooncular_API
-    }
-  });
-}
-    
-//Create recipe function 
-//@Takes recipe from api and convert to same format as user
-function createRecipe(recipeFromApi,user) {
-  let recipe={}
-  recipe.id=recipeFromApi.id
-  recipe.username=user
-  recipe.name=recipeFromApi.title
-  recipe.time=recipeFromApi.readyInMinutes
-  recipe.image=recipeFromApi.image
-  recipe.likes=recipeFromApi.aggregateLikes
-  recipe.isGluten=recipeFromApi.glutenFree
-  recipe.isVegaterian=recipeFromApi.vegetarian
-  recipe.totalamount=recipeFromApi.servings
-  recipe.ingredients=[]
-  recipe.ingredients.push(recipeFromApi.extendedIngredients.map((ingredient) =>{
-    return{
-      name: ingredient.name,
-      amount: ingredient.amount
-    }}
-  ));
-  
-  recipe.instructions=[]
-  recipe.instructions.push(recipeFromApi.analyzedInstructions[0].steps.map((instruction) =>{
-    return {
-      step: instruction.number,
-      instruction: instruction.step
-    }   
-  }))
-  return recipe;
-}
-    
-
-
-//Update user recipe profile history 
-async function updateWatchHistoryRecipes(username,recipeid)
-  {
-    var userHistory=[];
-    var recipeNotWatched;
-    var pool = await poolPromise  
-    var result = await pool.request()
-    .query(`select * from profile where username =  '${username}'`,async function(err, user){  
-      if (err){
-        next(err)
-    }
-
-    userHistory=JSON.parse("["+user.recordset[0].watchedRecipe+"]");
-    recipeNotWatched = userHistory.some(id => {return (id.toString()===recipeid.toString())}) //check if already saved in history , continue
-  
-    if(!recipeNotWatched){
-      userHistory.push(recipeid)
-      await pool.request()
-    .query(`update profile set watchedRecipe = '${userHistory}' where username =  '${username}'`,function(err, user){
-    })
-    }
-  })
-}
-
-//Update user recipe last watch
-async function updateLastWatchRecipe(username,recipeid)
-{
-  var userLastWatched=[];
-  var pool = await poolPromise  
-  var result = await pool.request()
-  .query(`select * from profile where username =  '${username}'`,async function(err, user){  
-  if (err){
-  console.log(err.message)
-  }
-
-  userLastWatched=JSON.parse("["+user.recordset[0].lastWatched+"]");
-  recipeNotWatched = userLastWatched.some(id => {return (id.toString()===recipeid.toString())})  // if recipe is already in last 3 so continue
-
-
-  if(!recipeNotWatched){
-    userLastWatched.push(recipeid)
-
-      //if 4 recipes saved so delelte the old one
-      if(userLastWatched.length==4) 
-          userLastWatched.shift()
-  
-    await pool.request()
-     .query(`update profile set lastWatched = '${userLastWatched}' where username =  '${username}'`,function(err, user){
-      })
-      }})
-  }
-
-
 
 
 module.exports = router;

@@ -8,6 +8,7 @@ const auth = require('../../middlewares/auth');
 const axios = require("axios");
 const api_domain = "https://api.spoonacular.com/recipes";
 const createError = require('http-errors')
+const recipes_actions = require('../utils/recipes_actions')
 
 //@route GET/api/profiles/myprofile
 //@desc get information about spesific recipe from external API 
@@ -18,7 +19,10 @@ router.get('/myprofile',auth, async function(req,res,next){
         var result = await pool.request()
        .query(`select * from profile where username = '${req.user}' `,function(err, recipes){  
            if (err)
-            next(error)
+             return next(error)
+            
+           if(recipes.recordset.length === 0)
+             return next(createError('404','Profivle doesnt exists'))
 
            else {  
            let userProfile = recipes.recordset[0]; 
@@ -31,26 +35,7 @@ router.get('/myprofile',auth, async function(req,res,next){
     }
 })
 
-//@route POST/api/profiles
-//@create new profile of user
-//@access Private
-router.post('/',auth, async function(req,res,next){
-   try{
-        pool = await poolPromise  
-        result = await pool.request()
-       .input("username",sql.VarChar(10), req.user)
-       .input("watchedRecipe",sql.VarChar('max'),[])
-       .input("favoriteRecipe",sql.VarChar(4000), [])
-       .input("familyRecipe",sql.VarChar(4000), [])
-       .input("lastWatched",sql.VarChar(4000), [])
-       .execute("insertProfile").then(function (recordSet){
-        return res.status(200).json({msg: 'New profile creatre d'})
-       })  
-   }
-   catch(error){
-    next(error);
-   }
-})
+
 
 //@route PUT/api/favorite
 //@update new favorite recipe
@@ -61,30 +46,27 @@ router.put('/favorite',auth,[check('id', 'must be not empty').not().isEmpty()],a
       const errors = validationResult(req)
       if(!errors.isEmpty())
          return res.status(400).json({ errors: errors.array() });
-      
+   
       const {id} = req.body;
-
       pool = await poolPromise  
-      result = await pool.request()
-      .query(`select * from profile where username =  '${req.user}'`,async function(err, user){  
-         if (err){
-            next(err)
+      result2 = await pool.request()
+      .query(`select * from recipes where id =  '${id}'`,async function(err, user){  
+         if (err)
+            return next(err)
+         //Check if the recipe belong to user
+         if(user.recordset.length !== 0)
+            recipes_actions.addToFavorite(id,req.user,'user',next,res)
+         else
+         {
+         //Check if this recipe is belong to API
+            try{
+            let exists= await recipes_actions.getRecipeInfo(id)
+            recipes_actions.addToFavorite(id,req.user,'spooncalur',next,res)
+            }
+           catch(err) {
+              next(err)
+           }
          }
-         //check if already saved in favorites
-         favoriteRecipe=JSON.parse("["+user.recordset[0].favoriteRecipe+"]");
-         recipeNotWatched = favoriteRecipe.some(recId => {
-          return recId.toString()===id.toString()
-      }) 
-
-      if(!recipeNotWatched){
-         favoriteRecipe.push(id)
-         await pool.request()
-         .query(`update profile set favoriteRecipe = '${id}' where username =  '${req.user}'`,function(err, user){
-            return res.status(200).json({message: 'Favorite recipe succesfuly added', sucess:'true'})
-         })
-      }
-      else
-       next(createError(400,'The recipe already exists'))
       })
    }
    catch(error){
