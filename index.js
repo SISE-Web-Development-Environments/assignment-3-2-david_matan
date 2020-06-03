@@ -2,6 +2,7 @@ const express = require('express');
 const connectDB = require('./config/db')
 const sessions = require("client-sessions")
 var bodyParser = require('body-parser')
+var cookieParser = require('cookie-parser');
 
 const app=express();
 
@@ -9,6 +10,8 @@ const app=express();
 app.use(bodyParser.json({extended: false}))
 
 app.use(bodyParser.json());
+
+app.use(cookieParser());
 
 //Init Cookie
 app.use(sessions({

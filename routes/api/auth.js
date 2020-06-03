@@ -36,9 +36,8 @@ router.post('/',[
 
             if(!isMatch)
              return next(createError(400, 'Password incorrect'));
-            
             req.session.userId = username;
-            res.status(200).json('Success')
+            res.status(200).json({message: req.cookies.session, success : 'true'})
             }
             })   
     }
@@ -51,7 +50,7 @@ router.post('/',[
 //@route GET/api/auth 
 //@desc Log out user
 //@access private
-router.get('/',auth, (req,res,next)=>  {  
+router.get('/logout',auth, (req,res,next)=>  {  
     try{
         req.session.reset();
         res.status(200).json({message : "Successfully logout" , success : 'True'})
