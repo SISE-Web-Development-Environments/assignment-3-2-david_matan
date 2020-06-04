@@ -5,6 +5,7 @@ const sql = require('mssql')
 const bcrypt = require ('bcryptjs');
 const createError = require('http-errors')
 const {check, validationResult} = require('express-validator')
+const registerNewUser = require('../utils/db_actions')
 
 
 //@route POST/api/users 
@@ -34,8 +35,6 @@ router.post('/',[
             return res.status(400).json({ errors: errors.array() });
   
         const {username,firstname,lastname,password,email,confirmpassword,url,country} = req.body;
-        var duplicateUserName=false;
-        var duplicateEmail=false;
 
         if(password!=confirmpassword)
             return next(createError(404,'Password does not match'));
@@ -45,46 +44,9 @@ router.post('/',[
         const salt= await bcrypt.genSalt(10);
         cryptpassword = await bcrypt.hash(password,salt);
 
-        //Check if user exists
-        var pool = await poolPromise  
-        var result = await pool.request()
-        .query('select * from users',async function(err, users){ 
-          if (err)   
-            return next(err)
-         
-          let data = users.recordset;  
-          let usernameInUse = data.some(user => {return user.username===username})
-
-            //UserName taken
-           if(usernameInUse)
-               return next(createError(404,'User already exists'))
-            
-            //Email taken
-            emailInUse = data.some((user) => {return user.email===email})
-            if(emailInUse)
-                return next(createError(404,'Email already exists'))
-             
-            await pool.request()
-             .input("username",sql.VarChar(10), username)
-             .input("firstname",sql.VarChar(4000), firstname)
-             .input("lastname",sql.VarChar(4000), lastname)
-             .input("country",sql.VarChar(50), country)
-             .input("password",sql.VarChar('max'),cryptpassword)
-             .input("email", sql.VarChar('4000'),email)
-             .input("url", sql.VarChar('max'),url)
-             .execute("insertUser").then(async function (recordSet){
-                 await pool.request()
-                .input("username",sql.VarChar(10), username)
-                .input("watchedRecipe",sql.VarChar('max'),[])
-                .input("favoriteRecipe",sql.VarChar(4000), [])
-                .input("familyRecipe",sql.VarChar(4000), [])
-                .input("lastWatched",sql.VarChar(4000), [])
-                .execute("insertProfile").then(function (recordSet){
-                    return res.status(200).json({msg: 'New User and profile creatred', success: 'true'})
-                })  
-            })
-       })
-    }
+        registerNewUser.registerNewUser(req.body,cryptpassword,next,res)
+ 
+      }
     catch(error){
         next(error);
     }

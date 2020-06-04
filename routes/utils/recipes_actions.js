@@ -17,7 +17,6 @@ function createPreviewRecipe(recipeFromApi) {
 
 
   function createRecipe(recipeFromApi,user) {
-    console.log(recipeFromApi)
     let recipe={}
     recipe.id=recipeFromApi.id
     recipe.username=user

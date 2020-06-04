@@ -10,6 +10,7 @@ const createError = require('http-errors')
 const axios = require("axios");
 const recipes_actions = require('../utils/recipes_actions')
 const  update_watch = require('../utils/update_watch')
+const db_actions = require('../utils/db_actions')
 
 
 //@route GET/api/recipes 
@@ -123,7 +124,7 @@ router.get('/familyrecipe/',auth, async function(req,res,next){
 //@route POST/api/recipes/familyrecipe
 //@desc create new familyrecipe ofuser
 //@access Private
-router.post('/familyrecipe/',auth, [
+router.post('/familyrecipes/',auth, [
 check('name', 'name must be not empty').not().isEmpty(),
 check('image', 'image must be not empty and contain url').not().isEmpty().isURL(),
 check('time', 'time must be not empty and integer').not().isEmpty().isInt(),
@@ -142,41 +143,7 @@ check('instructions', 'instructions must be not null').not().isEmpty()
       
       //Generate uniqe id for recipe
       const id=uniqid();
-
-      const {
-        name,
-        image,
-        time,
-        isGluten,
-        isVegaterian,
-        ingredients,
-        instructions,
-        totalamount,
-        wichtime,
-        belongs,
-        generations
-      } = req.body
-
-      //Add new recipe to DB
-      pool = await poolPromise  
-      result = await pool.request()
-      .input("id",sql.VarChar(4000), id)
-      .input("username",sql.VarChar(10), req.session.userId)
-      .input("name",sql.VarChar(4000), name)
-      .input("image",sql.VarChar(4000), image)
-      .input("time",sql.BigInt, time)
-      .input("likes",sql.BigInt,0)
-      .input("isGluten", sql.Bit,isGluten==='true' ? 1 : 0)
-      .input("isVegaterian", sql.Bit,isVegaterian==='true' ? 1 : 0)
-      .input("belongs",sql.VarChar(4000), belongs)
-      .input("wichtime",sql.VarChar(4000), wichtime)
-      .input("generations",sql.Int,generations)
-      .input("ingredients", sql.NVarChar('max'), JSON.stringify(ingredients))
-      .input("instructions", sql.NVarChar('max'), JSON.stringify(instructions))
-      .input("totalamount", sql.NVarChar('max'), totalamount)
-      .execute("insertFamilyRecipe").then(function (recordSet){
-      res.status(200).send({message: 'Success', sucess: 'true'})
-      })  
+      db_actions.insertNewFamilyRecipe(req.body,id,res,req.session.userId)
   }
   catch (err) {
      next(err);
@@ -204,34 +171,7 @@ check('instructions', 'instructions must be not null').not().isEmpty()
     //Generate uniqe id for recipe
     const id=uniqid();
 
-    const {
-      name,
-      image,
-      time,
-      isGluten,
-      isVegaterian,
-      ingredients,
-      instructions,
-      totalAmount
-    } = req.body
-
-    //Add new recipe to DB
-    pool = await poolPromise  
-    result = await pool.request()
-    .input("id",sql.VarChar(4000), id)
-    .input("username",sql.VarChar(10), req.session.userId)
-    .input("name",sql.VarChar(4000), name)
-    .input("image",sql.VarChar(4000), image)
-    .input("time",sql.BigInt, time)
-    .input("likes",sql.BigInt,0)
-    .input("isGluten", sql.Bit,isGluten==='true' ? 1 : 0)
-    .input("isVegaterian", sql.Bit,isVegaterian==='true' ? 1 : 0)
-    .input("ingredients", sql.NVarChar('max'), JSON.stringify(ingredients))
-    .input("instructions", sql.NVarChar('max'), JSON.stringify(instructions))
-    .input("totalAmount", sql.NVarChar('max'), totalAmount)
-    .execute("insertRecipe").then(function (recordSet){
-      res.status(200).send({message: 'Success', sucess: 'true'})
-   })  
+    db_actions.insertUserRecipe(req.body,id,res,req.session.userId)
   }
   catch(err){
   next(err)
