@@ -31,6 +31,7 @@ function createPreviewRecipe(recipeFromApi) {
     recipe.ingredients.push(recipeFromApi.extendedIngredients.map((ingredient) =>{
       return{
         name: ingredient.name,
+        unit: ingredient.unit,
         amount: ingredient.amount
       }}
     ));
@@ -70,7 +71,7 @@ function getRecipeInfo(id) {
        }
 
        if(profile.recordset.length === 0){
-       next(createError('404','profile doesnt exists'))
+      return next(createError(404,'profile doesnt exists'))
        }
  
        //check if already saved in favorites

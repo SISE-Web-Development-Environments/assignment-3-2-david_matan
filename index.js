@@ -3,10 +3,15 @@ const connectDB = require('./config/db')
 const sessions = require("client-sessions")
 var bodyParser = require('body-parser')
 var cookieParser = require('cookie-parser');
+var cors = require('cors');
+
 
 const app=express();
 
 //Init Middleware
+
+app.use(cors());
+
 app.use(bodyParser.json({extended: false}))
 
 app.use(bodyParser.json());

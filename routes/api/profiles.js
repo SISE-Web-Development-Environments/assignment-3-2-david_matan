@@ -22,7 +22,7 @@ router.get('/myprofile',auth, async function(req,res,next){
              return next(error)
             
            if(recipes.recordset.length === 0)
-             return next(createError('404','Profivle doesnt exists'))
+             return next(createError(404,'Profivle doesnt exists'))
 
            else {  
            let userProfile = recipes.recordset[0]; 

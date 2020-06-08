@@ -25,7 +25,7 @@ router.get('/',auth, async function(req,res,next){
         next(err)
       //get Recipes from database
      if(user.recordset.length === 0)
-      next(createError('404','User doesnt exists'))
+      next(createError(404,'User doesnt exists'))
       recipes=userecipes.recordset;
       res.status(200).send({recipes});
 
@@ -46,13 +46,17 @@ router.get('/userecipe/:id',auth, async function(req,res,next){
     result = await pool.request()
     .query(`select * from recipes where id=  '${req.params.id}'`,async function(err, recipe){  
       if (err){
-       next(err)
+       return next(err)
       }
 
       if(recipe.recordset.length === 0)
-       next(createError('404','Recipe doesnt exists'))
+       return next(createError(404,'Recipe doesnt exists'))
+    
+      recipe=recipe.recordset[0];
 
-    recipe=recipe.recordset[0];
+      
+      if(recipe.username!==req.user)
+       return next(createError(404,'Recipe doesnt exists'))
 
     //Save the recipe in user watched history recipes
     update_watch.updateLastWatchRecipe(req.user,req.params.id,next)
@@ -76,12 +80,14 @@ router.get('/familyrecipe/:id',auth, async function(req,res,next){
     result = await pool.request()
     .query(`select * from familyrecipes where id=  '${req.params.id}'`,async function(err, recipe){  
         if (err){
-          next(err)
+          return next(err)
         }
         console.log()
         if(recipe.recordset.length === 0)
-          next(createError('404','Recipe doesnt exists'))
+          return next(createError(404,'Recipe doesnt exists'))
 
+        if(recipe.username!==req.user)
+          return next(createError(404,'Recipe doesnt exists'))
       recipe=recipe.recordset[0];
       //Save the recipe in user watched history recipes
       update_watch.updateLastWatchRecipe(req.user,req.params.id,next)
@@ -109,7 +115,7 @@ router.get('/familyrecipe/',auth, async function(req,res,next){
       //Get fanilyRecipe from familyrecipe table
       
       if(userecipes.recordset.length === 0)
-        next(createError('404','Recipes doesnt exists'))
+        next(createError(404,'Recipes doesnt exists'))
 
       recipes=userecipes.recordset;
       res.status(200).send({recipes});
@@ -182,8 +188,8 @@ check('instructions', 'instructions must be not null').not().isEmpty()
 
 //@route GET/api/recipes/random 
 //@desc get 3 random preview recipies
-//@access Private
-router.get('/random',auth, async function(req,res,next){
+//@access Public
+router.get('/random', async function(req,res,next){
   try {
       let instructionsEmpty=true;
       while(instructionsEmpty){
@@ -196,7 +202,7 @@ router.get('/random',auth, async function(req,res,next){
       instructionsEmpty = get_random.data.recipes.some((recipe_raw) => recipe_raw==='')
     }
     let randomRecipes = get_random.data.recipes.map((recipe_raw) => recipes_actions.createPreviewRecipe(recipe_raw))
-    res.status(200).send({randomRecipes});
+    res.status(200).send(randomRecipes);
     } 
     catch (err){
       next(err);
@@ -251,7 +257,7 @@ router.get('/:id',auth, async function(req,res,next){
   try {
     const get_information= await recipes_actions.getRecipeInfo(req.params.id)
     let reqRecipe =recipes_actions.createRecipe(get_information.data,'SpooncularApi')
-   
+    console.log(get_information.data)
     //Save the recipe in user watched history recipes
     update_watch.updateLastWatchRecipe(req.user,req.params.id,next)
     //Save the recipe in lastWatched recipes
