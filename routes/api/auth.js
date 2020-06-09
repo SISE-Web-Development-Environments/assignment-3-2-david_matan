@@ -1,10 +1,9 @@
 const express = require('express');
 const router=express.Router();
-const { poolPromise } = require('../../config/db')  
-const sql = require('mssql')  
 const bcrypt = require ('bcryptjs');
 const {check, validationResult} = require('express-validator')
 const createError = require('http-errors')
+const db_actions = require('../utils/db_actions')
 const auth = require('../../middlewares/auth');
 
 //@route POST/api/auth 
@@ -19,26 +18,22 @@ router.post('/',[
         const errors = validationResult(req)
         if(!errors.isEmpty())
              next(errors)
+        
         const {username,password} = req.body;
-        var pool = await poolPromise  
-        var result = await pool.request()
-        .query(`select * from users where username = '${username}'`, async function(err, result) {  
-            user=result.recordset[0]
-            if (err) 
-             return next(err)
-            if(result.recordset.length === 0)
-             return  next(createError(400,'Username is not exists'));
+        //Retrieve the user from db
+        let result = await db_actions.getUser(username)
+        if(result.recordset.length === 0)
+            return  next(createError(400,'Username is not exists'));
+        // encrypt user password and validate
+        else{
+          let user=result.recordset[0];
+          const isMatch = await bcrypt.compare(password,user.password);
+           if(!isMatch)
+               return next(createError(400, 'Password incorrect'));
 
-            // encrypt user password and validate
-            else{
-            const isMatch = await bcrypt.compare(password,user.password);
-
-            if(!isMatch)
-             return next(createError(400, 'Password incorrect'));
-            req.session.userId = username;
-            res.status(200).json({message: req.cookies.session, success : 'true'})
-            }
-            })   
+          req.session.userId = username;
+          res.status(200).json({message: req.cookies.session, success : 'true'})
+        }
     }
     catch(error){
         next(error)

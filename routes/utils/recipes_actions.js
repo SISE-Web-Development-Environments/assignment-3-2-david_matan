@@ -2,6 +2,7 @@ const axios = require("axios");
 const api_domain = "https://api.spoonacular.com/recipes";
 const { poolPromise } = require('../../config/db') 
 const createError = require('http-errors') 
+const db_actions = require('./db_actions')
 
 function createPreviewRecipe(recipeFromApi) {
     let recipe={}
@@ -27,13 +28,11 @@ function createPreviewRecipe(recipeFromApi) {
     recipe.isGluten=recipeFromApi.glutenFree
     recipe.isVegaterian=recipeFromApi.vegetarian
     recipe.totalamount=recipeFromApi.servings
-    recipe.ingredients=[]
+    recipe.ingredients=[];
     recipe.ingredients.push(recipeFromApi.extendedIngredients.map((ingredient) =>{
-      return{
-        name: ingredient.name,
-        unit: ingredient.unit,
-        amount: ingredient.amount
-      }}
+      let newIngredient = {'name' : ingredient.name , 'unit' : ingredient.unit , 'amount' : ingredient.amount}
+      return newIngredient
+      }
     ));
     
     recipe.instructions=[]
@@ -62,40 +61,34 @@ function getRecipeInfo(id) {
   async function addToFavorite(id,username,type,next,res) {
     try{
 
-    var favoriteRecipe;
-    pool = await poolPromise  
-    result2 = await pool.request()
-    .query(`select * from profile where username =  '${username}'`,async function(err, profile){  
-       if (err){
-          next(err)
-       }
+      profile = await db_actions.getProfile(username)
 
-       if(profile.recordset.length === 0){
-      return next(createError(404,'profile doesnt exists'))
-       }
- 
-       //check if already saved in favorites
-       if(profile.recordset[0].favoriteRecipe.length===0)
-          favoriteRecipe=[]
-       else
-          favoriteRecipe=JSON.parse(profile.recordset[0].favoriteRecipe)
+      if(!profile)
+        return next(createError(404,'profile doesnt exists'))
+      if(profile.recordset.length === 0){
+        return next(createError(404,'profile doesnt exists'))
+      }
+
+      //check if already saved in favorites
+      if(profile.recordset[0].favoriteRecipe.length===0)
+        favoriteRecipe=[]
+      else
+        favoriteRecipe=JSON.parse(profile.recordset[0].favoriteRecipe)
           
-       recipeNotExists = favoriteRecipe.some(recId => {
+      let recipeNotExists = favoriteRecipe.some(recId => {
         return recId.id===id
     }) 
 
     if(!recipeNotExists){
-       //Check if the recipe is user or spoon api recipe 
-          let newFavorite={'id':id, 'type': type }
-          favoriteRecipe.push(newFavorite)
-          await pool.request()
-          .query(`update profile set favoriteRecipe = '${JSON.stringify(favoriteRecipe)}' where username =  '${username}'`,function(err, user){
-             return res.status(200).json({message: 'Favorite recipe succesfuly added', sucess:'true'})
-          })
-       }
-       else
-       next(createError(400,'The recipe already exists'))
-    })
+      //Check if the recipe is user or spoon api recipe 
+        let newFavorite={'id':id, 'type': type }
+        favoriteRecipe.push(newFavorite)
+        await pool.request().query(`update profile set favoriteRecipe = '${JSON.stringify(favoriteRecipe)}' where username =  '${username}'`);
+      
+    }
+      else
+      return next(createError(400,'The recipe already exists'))
+    
   }
   catch(err){
     next(err)

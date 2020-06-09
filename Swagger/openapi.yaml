@@ -1,0 +1,861 @@
+openapi: 3.0.3
+info:
+  title: David and Matan Recipe API
+  description: An API that allows user to use a lot of recipes that each user can
+    publish. The project built as part of course project in third year of information
+    system engineering
+  contact:
+    name: David Zaltsman
+    url: github.com/davidzal1992
+    email: davidzal@gmail.com
+  version: 1.0.1-oas3
+servers:
+- url: https://virtserver.swaggerhub.com/davidZal1992/RECIPE_API_OAS3.3/1.0.0
+  description: SwaggerHub API Auto Mocking
+paths:
+  /recipes/random:
+    get:
+      tags:
+      - recipes
+      summary: Obtain inforamtion about 3 recipes from database.
+      responses:
+        "200":
+          description: Successfull pull 3 randomly recipes information. Private information
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  oneOf:
+                  - $ref: '#/components/schemas/RecipePreview'
+                  - $ref: '#/components/schemas/RecipePreview'
+                  - $ref: '#/components/schemas/RecipePreview'
+        "500":
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error500'
+  /recipes:
+    get:
+      tags:
+      - recipes
+      summary: Obtain inforamtion about  recipes from database.
+      responses:
+        "200":
+          description: Successfull pull users recipes information. Private information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Recipes'
+        "404":
+          description: User doenst exits
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_404'
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error500'
+      security:
+      - cookieAuth: []
+    post:
+      tags:
+      - recipes
+      summary: Create new recipe and save in date base.
+      description: Creates a new recipe in the database
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/singleRecipe'
+        required: true
+      responses:
+        "200":
+          description: Succsefully created a new recipe
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Success
+                  success: "true"
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error500'
+      security:
+      - cookieAuth: []
+  /recipes/familyrecipes:
+    get:
+      tags:
+      - recipes
+      summary: Obtain inforamtion about  family recipes from database.
+      responses:
+        "200":
+          description: Successfull pull users family recipes information. Private
+            information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/familyRecipe'
+        "404":
+          description: User doenst exits
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_404'
+      security:
+      - cookieAuth: []
+    post:
+      tags:
+      - recipes
+      summary: Create new family recipe and save in date base.
+      description: Creates a new recipe in the database
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/singleRecipe'
+        required: true
+      responses:
+        "200":
+          description: Succsefully created a new recipe
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Success
+                  success: "true"
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error500'
+      security:
+      - cookieAuth: []
+  /recipes/familyrecipe/{id}:
+    get:
+      tags:
+      - recipes
+      summary: Get new family recipe by id from DB.
+      description: Obtain information about spesific recipe from DB
+      parameters:
+      - name: id
+        in: path
+        description: The ID of the recipe
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          example: 1532
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/familyRecipe'
+        "404":
+          description: Recipe doenst exits
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_404_1'
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error500'
+      security:
+      - cookieAuth: []
+  /recipes/{id}:
+    get:
+      tags:
+      - recipes
+      summary: Get new recipe by id from API.
+      description: Obtain information about spesific recipe from spoonCalur API
+      parameters:
+      - name: id
+        in: path
+        description: The ID of the recipe
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          example: 1532
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/singleRecipe'
+        "404":
+          description: Recipe doenst exits
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_404'
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error500'
+      security:
+      - cookieAuth: []
+  /recipes/userecipe/{id}:
+    get:
+      tags:
+      - recipes
+      summary: Get new recipe by id from DB.
+      description: Obtain information about spesific recipe from DB
+      parameters:
+      - name: id
+        in: path
+        description: The ID of the recipe
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          example: 7542431
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/singleRecipe'
+        "404":
+          description: Recipe doenst exits
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_404_1'
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error500'
+      security:
+      - cookieAuth: []
+  /auth:
+    post:
+      tags:
+      - auth
+      summary: Logs in authotentication
+      requestBody:
+        description: A JSON object containing the login and password.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+        required: true
+      responses:
+        "200":
+          description: |
+            Successfully authorezied. named `session is returned in a coockie name`.
+          headers:
+            Set-Cookie:
+              style: simple
+              explode: false
+              schema:
+                type: string
+                example: session=abcde12345;
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: gjfjEgjjirTRfjcfj3453.sdfjikffktosmvy3$kgjvETHBe34-.AAScvt43
+                  success: "true"
+        "401":
+          description: |
+            Invalid cradentials - Authentication failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_401'
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error500'
+      security: []
+  /auth/logout:
+    get:
+      tags:
+      - auth
+      summary: Logs out
+      description: Logs out and delete session
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Succesfully logs out
+                  success: "true"
+      security:
+      - cookieAuth: []
+  /users:
+    post:
+      tags:
+      - User
+      summary: Sign up and returns the authentication  cookie
+      requestBody:
+        description: A JSON object containing the register parameters.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignUpRequest'
+        required: true
+      responses:
+        "200":
+          description: |
+            Successfully Registerd.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_200'
+      security: []
+  /profiles/myprofile:
+    get:
+      tags:
+      - Profile
+      summary: Return the all information about user
+      description: Obtain information about spesific recipe
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/profile'
+        "404":
+          description: Profile doenst exits
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_404'
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error500'
+      security:
+      - cookieAuth: []
+  /profiles/favorite:
+    put:
+      tags:
+      - Profile
+      summary: Update the user favorite recipes
+      description: update the user`s favorite recipes array
+      requestBody:
+        description: Successfuly update.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/singleRecipe'
+        required: true
+      responses:
+        "200":
+          description: Update Successed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/profile'
+        "404":
+          description: User does not exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_404_2'
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error500'
+      security:
+      - cookieAuth: []
+  /recipes/search:
+    get:
+      tags:
+      - search
+      summary: Search for Recipe
+      description: '> Search for recipe in the spooncular API. can filter result by:
+        diest, cousine and intolreance'
+      parameters:
+      - name: recipename
+        in: query
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+          example: Fish and Frize
+      - name: amount
+        in: query
+        description: number of results will return
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: integer
+          default: 5
+          enum:
+          - 5
+          - 10
+          - 15
+      - name: cousine
+        in: query
+        description: Kind of cousine will looking for
+        required: false
+        style: form
+        explode: true
+        schema:
+          $ref: '#/components/schemas/Cousines'
+        example: African
+      - name: diet
+        in: query
+        description: Kind of diets recipes will looking for
+        required: false
+        style: form
+        explode: true
+        schema:
+          $ref: '#/components/schemas/Diets'
+        example: Primal
+      - name: intolerance
+        in: query
+        description: Kind of diets recipes will looking for
+        required: false
+        style: form
+        explode: true
+        schema:
+          $ref: '#/components/schemas/Intolerances'
+        example: Soy
+      responses:
+        "200":
+          description: Results found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecipePreview'
+        "404":
+          description: No results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_404_3'
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error500'
+components:
+  schemas:
+    Recipes:
+      type: array
+      items:
+        $ref: '#/components/schemas/singleRecipe'
+    singleRecipe:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: id of reipe
+          example: 1532
+        username:
+          type: string
+          description: owner recipe username
+          example: davidzzz1
+        name:
+          type: string
+          description: title of recie
+          example: Hamburger
+        image:
+          type: string
+          description: image of recipe
+          example: http://www.googl.com/img34.jpg
+        time:
+          type: integer
+          description: duration
+          example: 45
+        likes:
+          type: integer
+          description: how much likes for recipe
+          example: 17
+        isGluten:
+          type: boolean
+          description: include gluten
+          example: false
+        isVegaterian:
+          type: boolean
+          description: for vegeterians
+          example: false
+        ingredients:
+          type: array
+          description: ingredients of reipe
+          example:
+          - amount: 5
+            product: pound beef short ribs
+          - amount: 2
+            unit: oz
+            product: teaspoon salt
+          - amount: 1.5
+            unit: oz
+            product: tablespoons all-purpose flour
+          - amount: 0.5
+            unit: oz
+            product: teaspoon ground black pepper
+          items:
+            $ref: '#/components/schemas/singleRecipe_ingredients'
+        instructions:
+          $ref: '#/components/schemas/Instructions'
+    Instructions:
+      type: array
+      example:
+      - Step: "1"
+        instruction: Preheat oven to 350 degrees F (175 degrees C). Grease and flour
+          a 9x9 inch pan or line a            muffin pan with paper liners.
+      - Step: "2"
+        instruction: In a medium bowl, cream together the sugar and butter. Beat in
+          the eggs, one at a time, then stir in the vanilla. Combine flour and baking
+          powder, add to the creamed mixture and mix well. Finally stir in the milk
+          until batter is smooth. Pour or spoon batter into the prepared pan.
+      - Step: "3"
+        instruction: Bake for 30 to 40 minutes in the preheated oven. For cupcakes,
+          bake 20 to 25 minutes. Cake is done when it springs back to the touch.
+      items:
+        $ref: '#/components/schemas/Instructions_inner'
+    RecipePreview:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1532
+        name:
+          type: string
+          example: Hamburger
+        image:
+          type: string
+          example: http://www.googl.com/img34.jpg
+        time:
+          type: integer
+          example: 45
+        likes:
+          type: integer
+          example: 17
+        isGluten:
+          type: boolean
+          example: false
+        isVegaterian:
+          type: boolean
+          example: false
+    familyRecipe:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1532
+        username:
+          type: string
+          example: davidzzz1
+        name:
+          type: string
+          example: Hamburger
+        image:
+          type: string
+          example: http://www.googl.com/img34.jpg
+        time:
+          type: integer
+          example: 45
+        likes:
+          type: integer
+          example: 17
+        isGluten:
+          type: boolean
+          example: false
+        isVegaterian:
+          type: boolean
+          example: false
+        belongs:
+          type: string
+          example: mother
+        wichtimes:
+          type: array
+          example:
+          - pessah
+          - shavuot
+          items:
+            type: string
+        generations:
+          type: integer
+          example: 3
+        ingredients:
+          type: array
+          example:
+          - amount: 5
+            unit: oz
+            product: pound beef short ribs
+          - amount: 2
+            unit: oz
+            product: teaspoon salt
+          - amount: 1.5
+            unit: oz
+            product: tablespoons all-purpose flour
+          - amount: 0.5
+            unit: oz
+            product: teaspoon ground black pepper
+          items:
+            $ref: '#/components/schemas/singleRecipe_ingredients'
+        instructions:
+          $ref: '#/components/schemas/Instructions'
+    LoginRequest:
+      type: object
+      properties:
+        username:
+          maxLength: 8
+          minLength: 3
+          type: string
+          example: davidzzz11
+        password:
+          maxLength: 10
+          minLength: 5
+          type: string
+          description: Contain only letters
+          example: 1234david
+    SignUpRequest:
+      type: object
+      properties:
+        username:
+          maxLength: 8
+          minLength: 3
+          type: string
+          example: davidzzz11
+        first name:
+          type: string
+          example: David
+        last name:
+          type: string
+          example: Zaltsman
+        country:
+          type: string
+          example: Israel
+        password:
+          maxLength: 10
+          minLength: 5
+          type: string
+          description: Contain only letters
+          example: 1234david
+        confirn password:
+          maxLength: 10
+          minLength: 5
+          type: string
+          description: Contain letters with at least 1 numberical charachter and 1
+            special characters
+          example: 1234david
+        email:
+          type: string
+          example: davidzal@post.bgu.ac.il
+        avatar:
+          type: string
+          example: https://image.shutterstock.com/w-705104968.jpg
+    profile:
+      type: object
+      properties:
+        username:
+          type: string
+          example: davidzzz11
+        favoriteRecipe:
+          type: array
+          example:
+          - id: "2323"
+          - id: "3426"
+          items:
+            type: object
+        watchedRecipe:
+          type: array
+          example:
+          - id: "2323"
+          - id: "3426"
+          items:
+            type: object
+        lastWatched:
+          type: array
+          example:
+          - id: "2323"
+          - id: "3426"
+          - id: "3456"
+          items:
+            type: object
+    Cousines:
+      type: string
+      enum:
+      - African
+      - American
+      - British
+      - Cajun
+      - Caribbean
+      - Chinese
+      - Eastern European
+      - European
+      - French
+      - German
+      - Greek
+      - Indian
+      - Irish
+      - Italian
+      - Japanese
+      - Jewish
+      - Korean
+      - Latin American
+      - Mediterranean
+      - Mexican
+      - Middle Eastern
+      - Nordic
+      - Southern
+      - Spanish
+      - Thai
+      - Vietnamese
+    Diets:
+      type: string
+      enum:
+      - Gluten Free
+      - Ketogenic
+      - Vegetarian
+      - Lacto-Vegetarian
+      - Ovo-Vegetarian
+      - Vegan
+      - Pescetarian
+      - Paleo
+      - Primal
+      - Whole30
+    Intolerances:
+      type: string
+      enum:
+      - Dairy
+      - Egg
+      - Gluten
+      - Grain
+      - Peanut
+      - Seafood
+      - Sesame
+      - Shellfish
+      - Soy
+      - Sulfite
+      - Tree Nut
+      - Wheat
+    Error400:
+      type: object
+      properties:
+        messagse:
+          type: string
+          example: Bad request
+        success:
+          type: string
+          example: "false"
+    Error500:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Server error
+        sucess:
+          type: string
+          example: false;
+    inline_response_404:
+      type: object
+      properties:
+        messasge:
+          type: string
+          example: User doesnt exists
+        success:
+          type: boolean
+          example: false
+    inline_response_404_1:
+      type: object
+      properties:
+        messasge:
+          type: string
+          example: Recipe doesnt exists
+        success:
+          type: boolean
+          example: false
+    inline_response_401:
+      type: object
+      properties:
+        messasge:
+          type: string
+          example: Usernam doesnt exists
+        success:
+          type: boolean
+          example: false
+    inline_response_200:
+      type: object
+      properties:
+        messasge:
+          type: string
+          example: Success
+        success:
+          type: boolean
+          example: true
+    inline_response_404_2:
+      type: object
+      properties:
+        messasge:
+          type: string
+          example: User does not exists
+        success:
+          type: boolean
+          example: false
+    inline_response_404_3:
+      type: object
+      properties:
+        messasge:
+          type: string
+          example: No results found
+        success:
+          type: boolean
+          example: false
+    singleRecipe_ingredients:
+      type: object
+      properties:
+        amount:
+          type: integer
+        product:
+          type: string
+    Instructions_inner:
+      type: object
+      properties:
+        Step:
+          type: string
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      description: 'Session key to identify user session. '
+      name: session
+      in: cookie
