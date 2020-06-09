@@ -22,9 +22,10 @@ if(!(req.session && req.session.userId)){
      user.password= undefined;
      
      req.user = req.session.userId;
+
      //Access user variable in any html templates
      res.locals.user = user;
-
+     
      next();
     });  
 }

@@ -32,7 +32,6 @@ router.post('/',[
             // encrypt user password and validate
             else{
             const isMatch = await bcrypt.compare(password,user.password);
-            console.log(isMatch)
 
             if(!isMatch)
              return next(createError(400, 'Password incorrect'));
