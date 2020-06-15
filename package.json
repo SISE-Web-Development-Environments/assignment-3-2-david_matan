@@ -1,5 +1,5 @@
 {
-  "name": "npm-init",
+  "name": "server",
   "version": "1.0.0",
   "description": "API Recipe- Course project",
   "main": "index.js",
@@ -28,7 +28,7 @@
     "nodemon": "^2.0.3"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+	"start": "node index.js"
   },
   "author": "David Zaltsman & Matan Gadasi",
   "license": "ISC"
