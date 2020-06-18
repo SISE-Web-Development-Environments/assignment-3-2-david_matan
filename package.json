@@ -1,5 +1,5 @@
 {
-  "name": "npm-init",
+  "name": "server",
   "version": "1.0.0",
   "description": "API Recipe- Course project",
   "main": "index.js",
@@ -29,7 +29,6 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start":"node index.js",
     "server": "cd ../ && cd Server && nodemon index.js",
     "client": "npm run serve",
     "dev": "concurrently \"npm run server\" \"npm run client\""
