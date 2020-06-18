@@ -10,8 +10,14 @@ const app=express();
 
 //Init Middleware
 
-app.use(cors());
-app.options("*", cors());
+const corsConfig = {
+  origin: true,
+  credentials: true
+};
+
+app.use(cors(corsConfig));
+app.options("*", cors(corsConfig));
+
 
 app.use(bodyParser.json({extended: false}))
 
