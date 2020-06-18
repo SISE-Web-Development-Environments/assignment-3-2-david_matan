@@ -6,6 +6,7 @@ const db_actions = require('./db_actions')
 
 function createPreviewRecipe(recipeFromApi) {
     let recipe={}
+    recipe.summary=recipeFromApi.summary;
     recipe.id=recipeFromApi.id
     recipe.name=recipeFromApi.title
     recipe.time=recipeFromApi.readyInMinutes

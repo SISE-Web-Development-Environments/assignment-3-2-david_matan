@@ -18,7 +18,6 @@ router.post('/',[
         const errors = validationResult(req)
         if(!errors.isEmpty())
              next(errors)
-        
         const {username,password} = req.body;
         //Retrieve the user from db
         let result = await db_actions.getUser(username)

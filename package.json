@@ -28,7 +28,11 @@
     "nodemon": "^2.0.3"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start":"node index.js",
+    "server": "cd ../ && cd Server && nodemon index.js",
+    "client": "npm run serve",
+    "dev": "concurrently \"npm run server\" \"npm run client\""
   },
   "author": "David Zaltsman & Matan Gadasi",
   "license": "ISC"

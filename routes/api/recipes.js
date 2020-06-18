@@ -189,10 +189,14 @@ router.get('/random', async function(req,res,next){
 //@route GET/api/recipes/search
 //@desc get information about spesific recipe from external API 
 //@access Private
-router.get("/search", auth, async function(req,res,next) {
+router.get("/search", async function(req,res,next) {
   try {
     const { query, cuisine, diet, intolerances, number } = req.query;
-
+    console.log(query)
+    console.log(number)
+    console.log(cuisine + ' cuisineempty')
+    console.log(diet + 'diet empty')
+    console.log(intolerances + 'intoleracnes empty')
     const search_response = await axios.get(`${api_domain}/search`, {
     params: {
         cuisine: cuisine,
@@ -204,7 +208,6 @@ router.get("/search", auth, async function(req,res,next) {
         apiKey: process.env.spooncular_API
       }
     });
-
     let recipes = await Promise.all(
     search_response.data.results.map((recipe_raw) =>
     recipes_actions.getRecipeInfo(recipe_raw.id)
@@ -214,9 +217,11 @@ router.get("/search", auth, async function(req,res,next) {
     if(recipes.length===0)
       return next(createError(404,'No results found'))
     
+      
     //Convert to my pattern
     let convertedRecipes=[];
     recipes.map((recipe) => convertedRecipes.push(recipes_actions.createPreviewRecipe(recipe.data)));
+    console.log(convertedRecipes)
     res.send(convertedRecipes);
     } 
   catch (err) {
