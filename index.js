@@ -11,10 +11,9 @@ const app=express();
 //Init Middleware
 
 const corsConfig = {
-  origin: true,
+  origin: 'http://localhost:8080',
   credentials: true
 };
-
 app.use(cors(corsConfig));
 app.options("*", cors(corsConfig));
 
@@ -44,8 +43,8 @@ app.use('/api/profiles', require('./routes/api/profiles'))
 
 //Catch all
 app.use(function (err, req, res, next) {
-  console.error(err.status);
-  return res.status(err.status || 500).send({ message: err.message, success: false });
+console.error(err.status);
+return res.status(err.status || 500).send({ message: err.message, success: false });
 });
 
 const PORT = process.env.PORT || 3000;
