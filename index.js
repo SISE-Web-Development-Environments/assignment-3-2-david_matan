@@ -11,6 +11,7 @@ const app=express();
 //Init Middleware
 
 app.use(cors());
+app.options("*", cors());
 
 app.use(bodyParser.json({extended: false}))
 
