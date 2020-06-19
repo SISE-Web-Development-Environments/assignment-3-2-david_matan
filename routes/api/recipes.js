@@ -18,7 +18,6 @@ const db_actions = require('../utils/db_actions')
 //@access Private
 router.get('/',auth, async function(req,res,next){
   try {
-      console.log('bbb')
       recipes=await db_actions.getUserRecipes(req.user,next)
       if(!recipes)
         return next(createError(404,'Recipes doesnt exists'))

@@ -30,7 +30,7 @@ app.use(sessions({
   secret: process.env.COOCKIE_SECRET, 
   duration: 2 * 60 * 60 * 1000,
   cookie:{
-    ephemeral:true,
+    ephemeral:false,
     httpOnly: false,
     secure:false
   }
