@@ -31,7 +31,6 @@ router.post('/',[
                return next(createError(400, 'Password incorrect'));
 
           req.session.userId = username;
-          console.log(req.session)
           res.status(200).json({message: req.cookies.session, success : 'true'})
         }
     }

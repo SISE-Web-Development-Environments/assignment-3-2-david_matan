@@ -8,11 +8,11 @@ function createPreviewRecipe(recipeFromApi) {
     let recipe={}
     recipe.summary=recipeFromApi.summary;
     recipe.id=recipeFromApi.id
-    recipe.name=recipeFromApi.title
-    recipe.time=recipeFromApi.readyInMinutes
-    recipe.likes=recipeFromApi.aggregateLikes
-    recipe.isGluten=recipeFromApi.glutenFree
-    recipe.isVegaterian=recipeFromApi.vegetarian
+    recipe.title=recipeFromApi.title
+    recipe.readyInMinutes=recipeFromApi.readyInMinutes
+    recipe.aggregateLikes=recipeFromApi.aggregateLikes
+    recipe.glutenFree=recipeFromApi.glutenFree
+    recipe.vegetarian=recipeFromApi.vegetarian
     recipe.image=recipeFromApi.image
     return recipe;
   }
@@ -22,13 +22,13 @@ function createPreviewRecipe(recipeFromApi) {
     let recipe={}
     recipe.id=recipeFromApi.id
     recipe.username=user
-    recipe.name=recipeFromApi.title
-    recipe.time=recipeFromApi.readyInMinutes
+    recipe.title=recipeFromApi.title
+    recipe.readyInMinutes=recipeFromApi.readyInMinutes
     recipe.image=recipeFromApi.image
-    recipe.likes=recipeFromApi.aggregateLikes
-    recipe.isGluten=recipeFromApi.glutenFree
-    recipe.isVegaterian=recipeFromApi.vegetarian
-    recipe.totalamount=recipeFromApi.servings
+    recipe.aggregateLikes=recipeFromApi.aggregateLikes
+    recipe.glutenFree=recipeFromApi.glutenFree
+    recipe.vegetariann=recipeFromApi.vegetarian
+    recipe.servings=recipeFromApi.servings
     recipe.ingredients=[];
     recipe.ingredients.push(recipeFromApi.extendedIngredients.map((ingredient) =>{
       let newIngredient = {'name' : ingredient.name , 'unit' : ingredient.unit , 'amount' : ingredient.amount}
