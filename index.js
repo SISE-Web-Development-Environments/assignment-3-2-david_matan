@@ -9,7 +9,6 @@ var cors = require('cors');
 const app=express();
 
 //Init Middleware
-
 const corsConfig = {
   origin: 'http://localhost:8080',
   credentials: true,
