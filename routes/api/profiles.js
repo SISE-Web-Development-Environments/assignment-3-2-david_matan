@@ -80,12 +80,12 @@ router.get('/lastwatch',auth, async function(req,res,next){
  
      var lastWatchRecipes=[]
      let userProfile = result.recordset[0]; 
- 
+     let newone
      //if there is last watch recipe so return preview
      if(userProfile.lastWatched!==''){
        userProfile.lastWatched= JSON.parse(userProfile.lastWatched)
      //Promise for all requests
-       const newone = await  Promise.all(userProfile.lastWatched.map(async recipeId => {
+        newone = await  Promise.all(userProfile.lastWatched.map(async recipeId => {
      //If from api so
          if(recipeId.type==='api'){
            const get_information= await  recipes_actions.getRecipeInfo(recipeId.id)
@@ -99,16 +99,18 @@ router.get('/lastwatch',auth, async function(req,res,next){
            recipe = result.recordset[0];
            preview=recipes_actions.createPreviewRecipe(recipe)
            lastWatchRecipes.push(preview)
+           return lastWatchRecipes
            }
            else
            result = await db_actions.getUserFamilySpesificRecipe(req.params.id,next)
            recipe = result.recordset[0];
            preview=recipes_actions.createPreviewRecipe(recipe)
            lastWatchRecipes.push(preview)
+           return lastWatchRecipes
          }
        ))
    } 
-         res.status(200).send({lastWatchRecipes});
+         res.status(200).send(lastWatchRecipes);
    }
    catch (err){
       next(err)
