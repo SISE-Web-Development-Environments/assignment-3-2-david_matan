@@ -13,56 +13,6 @@ const  update_watch = require('../utils/update_watch')
 const db_actions = require('../utils/db_actions')
 
 
-
-
-//@route GET/api/recipes/:id
-//@desc get information about spesific recipe from external API 
-//@access Private
-router.get('/lastwatch',auth, async function(req,res,next){
-  try {
-    let result = await db_actions.getProfile(req.user,next)
-    if(!result)
-        return next(createError(404,'Profile doesnt exists'))
-    if(result.recordset.length === 0)
-        return next(createError(404,'Profile doesnt exists'))
-
-    var lastWatchRecipes=[]
-    let userProfile = result.recordset[0]; 
-
-    //if there is last watch recipe so return preview
-    if(userProfile.lastWatched!==''){
-      userProfile.lastWatched= JSON.parse(userProfile.lastWatched)
-    //Promise for all requests
-      const newone = await  Promise.all(userProfile.lastWatched.map(async recipeId => {
-    //If from api so
-        if(recipeId.type==='api'){
-          const get_information= await  recipes_actions.getRecipeInfo(recipeId.id)
-          preview= await  recipes_actions.createPreviewRecipe(get_information.data)
-          lastWatchRecipes.push(preview)
-          }
-    //if else from user
-       else if(recipeId.type==='user'){
-          result = await db_actions.getUserSpesificRecipe(req.params.id,next)
-          recipe = result.recordset[0];
-          preview=recipes_actions.createPreviewRecipe(recipe)
-          lastWatchRecipes.push(preview)
-          }
-        else
-          result = await db_actions.getUserFamilySpesificRecipe(req.params.id,next)
-          recipe = result.recordset[0];
-          preview=recipes_actions.createPreviewRecipe(recipe)
-          lastWatchRecipes.push(preview)
-        }
-      ))
-        res.status(200).send({lastWatchRecipes});
-  } 
-    
-  }
-  catch (err){
-     next(err)
-  }
-});
-
 //@route GET/api/recipes 
 //@desc get all users recipes
 //@access Private

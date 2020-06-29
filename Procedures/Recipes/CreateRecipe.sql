@@ -8,15 +8,16 @@ CREATE TABLE recipes
 (
     id [VARCHAR](4000) NOT NULL PRIMARY KEY, -- primary key column
     username [VARCHAR](10) NOT NULL,
-    name [VARCHAR](4000) NOT NULL,
+    title [VARCHAR](4000) NOT NULL,
     image [VARCHAR](4000) NOT NULL, 
-    time bigint NOT NULL,
-    likes bigint NOT NULL,
-    isGluten BIT NOT NULL,
-    isVegaterian BIT NOT NULL,
+    readyInMinutes bigint NOT NULL,
+    aggregateLikes bigint NOT NULL,
+    glutenFree BIT NOT NULL,
+    vegetarian BIT NOT NULL,
     ingredients[NVARCHAR](MAX) NOT NULL,
     instructions[NVARCHAR](MAX) NOT NULL,
-    totalamount INTEGER NOT NULL
+    servings INTEGER NOT NULL,
+    summary [VARCHAR](4000)
 
 );
 GO

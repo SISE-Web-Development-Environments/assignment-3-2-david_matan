@@ -5,19 +5,20 @@ CREATE procedure [dbo].[insertRecipe]
 (  
 @id varchar(4000),
 @username varchar(10),
-@name varchar(4000), 
+@title varchar(4000), 
 @image varchar(4000), 
-@time bigint, 
-@likes bigint,    
-@isGluten bit,
-@isVegaterian bit,
+@readyInMinutes bigint, 
+@aggregateLikes bigint,    
+@glutenFree bit,
+@vegetarian bit,
 @ingredients nvarchar(max),
 @instructions nvarchar(max),
-@totalamount integer
+@servings integer,
+@summary varchar(4000)
 )  
 AS  
 BEGIN  
-insert into recipes (id,username,name,image,time,likes,isGluten,isVegaterian,ingredients,instructions,totalamount) values( @id,@username,@name,@image,@time,@likes,@isGluten,@isVegaterian,@ingredients,@instructions,@totalamount)  
+insert into recipes (id,username,title,image, readyInMinutes,aggregateLikes,glutenFree,vegetarian,ingredients,instructions,servings,summary) values( @id,@username,@title,@image,@readyInMinutes,@aggregateLikes,@glutenFree,@vegetarian,@ingredients,@instructions,@servings,@summary)  
 END  
 
 

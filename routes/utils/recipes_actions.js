@@ -4,16 +4,17 @@ const { poolPromise } = require('../../config/db')
 const createError = require('http-errors') 
 const db_actions = require('./db_actions')
 
-function createPreviewRecipe(recipeFromApi) {
+function createPreviewRecipe(recipeFromApi,type) {
     let recipe={}
-    recipe.summary=recipeFromApi.summary;
     recipe.id=recipeFromApi.id
+    recipe.type=
     recipe.title=recipeFromApi.title
     recipe.readyInMinutes=recipeFromApi.readyInMinutes
     recipe.aggregateLikes=recipeFromApi.aggregateLikes
     recipe.glutenFree=recipeFromApi.glutenFree
     recipe.vegetarian=recipeFromApi.vegetarian
     recipe.image=recipeFromApi.image
+    recipe.summary=recipeFromApi.summary;
     return recipe;
   }
 
@@ -27,7 +28,7 @@ function createPreviewRecipe(recipeFromApi) {
     recipe.image=recipeFromApi.image
     recipe.aggregateLikes=recipeFromApi.aggregateLikes
     recipe.glutenFree=recipeFromApi.glutenFree
-    recipe.vegetariann=recipeFromApi.vegetarian
+    recipe.vegetarian=recipeFromApi.vegetarian
     recipe.servings=recipeFromApi.servings
     recipe.ingredients=[];
     recipe.ingredients.push(recipeFromApi.extendedIngredients.map((ingredient) =>{
@@ -43,6 +44,7 @@ function createPreviewRecipe(recipeFromApi) {
         instruction: instruction.step
       }   
     }))
+    recipe.summary=recipeFromApi.summary;
     return recipe;
   }
 
@@ -61,7 +63,6 @@ function getRecipeInfo(id) {
 
   async function addToFavorite(id,username,type,next,res) {
     try{
-
       profile = await db_actions.getProfile(username)
 
       if(!profile)

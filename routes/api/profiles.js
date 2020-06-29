@@ -46,11 +46,15 @@ router.put('/favorite',auth,[check('id', 'must be not empty').not().isEmpty()],a
          return res.status(400).json({ errors: errors.array() });
    
       const {id} = req.body;
-      let result = await db_actions.getUserSpesificRecipe(id,next);
-
       //Check if the recipe belong to user
+      result = await db_actions.getUserSpesificRecipe(id,next);
       if(result.recordset && result.recordset.length!=0)
       await recipes_actions.addToFavorite(id,req.user,'user',next,res)
+
+      //Check if the recipe belong to family
+      result = await db_actions.getFamilyRecipe(id,next);
+      if(result.recordset && result.recordset.length!=0)
+      await recipes_actions.addToFavorite(id,req.user,'family',next,res)
 
       else{
       //Check if this recipe is belong to API
@@ -89,7 +93,7 @@ router.get('/lastwatch',auth, async function(req,res,next){
      //If from api so
          if(recipeId.type==='api'){
            const get_information= await  recipes_actions.getRecipeInfo(recipeId.id)
-           preview= await  recipes_actions.createPreviewRecipe(get_information.data)
+           preview= await  recipes_actions.createPreviewRecipe(get_information.data,'spooncalur')
            lastWatchRecipes.push(preview)
            return lastWatchRecipes
            }
@@ -97,14 +101,15 @@ router.get('/lastwatch',auth, async function(req,res,next){
           else if(recipeId.type==='user'){
            result = await db_actions.getUserSpesificRecipe(req.params.id,next)
            recipe = result.recordset[0];
-           preview=recipes_actions.createPreviewRecipe(recipe)
+           preview=recipes_actions.createPreviewRecipe(recipe,'user')
            lastWatchRecipes.push(preview)
            return lastWatchRecipes
            }
+      // else from family
            else
            result = await db_actions.getUserFamilySpesificRecipe(req.params.id,next)
            recipe = result.recordset[0];
-           preview=recipes_actions.createPreviewRecipe(recipe)
+           preview=recipes_actions.createPreviewRecipe(recipe,'family')
            lastWatchRecipes.push(preview)
            return lastWatchRecipes
          }

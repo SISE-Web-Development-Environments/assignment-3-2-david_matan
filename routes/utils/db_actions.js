@@ -72,17 +72,18 @@ async function insertProfile(req,username,next)
 async function insertNewFamilyRecipe(recipeDetails,id,res,username)
 {
     const {
-        name,
+        title,
         image,
-        time,
-        isGluten,
-        isVegaterian,
+        readyInMinutes,
+        glutenFree,
+        vegetarian,
         ingredients,
         instructions,
-        totalamount,
+        servings,
         wichtime,
         belongs,
-        generations
+        generations,
+        summary
       } = recipeDetails
 
       //Add new recipe to DB
@@ -90,18 +91,19 @@ async function insertNewFamilyRecipe(recipeDetails,id,res,username)
       result = await pool.request()
       .input("id",sql.VarChar(4000), id)
       .input("username",sql.VarChar(10), username)
-      .input("name",sql.VarChar(4000), name)
+      .input("name",sql.VarChar(4000), title)
       .input("image",sql.VarChar(4000), image)
-      .input("time",sql.BigInt, time)
-      .input("likes",sql.BigInt,0)
-      .input("isGluten", sql.Bit,isGluten==='true' ? 1 : 0)
-      .input("isVegaterian", sql.Bit,isVegaterian==='true' ? 1 : 0)
+      .input("readyInMinutes",sql.BigInt, readyInMinutes)
+      .input("aggregateLikes",sql.BigInt,0)
+      .input("glutenFree", sql.Bit,glutenFree==='true' ? 1 : 0)
+      .input("isVegaterian", sql.Bit,vegetarian==='true' ? 1 : 0)
       .input("belongs",sql.VarChar(4000), belongs)
       .input("wichtime",sql.VarChar(4000), wichtime)
       .input("generations",sql.Int,generations)
       .input("ingredients", sql.NVarChar('max'), JSON.stringify(ingredients))
       .input("instructions", sql.NVarChar('max'), JSON.stringify(instructions))
-      .input("totalamount", sql.NVarChar('max'), totalamount)
+      .input("servings", sql.NVarChar('max'), servings)
+      .input("summary", sql.NVarChar(4000), summary)
       .execute("insertFamilyRecipe").then(function (recordSet){
       res.status(200).send({message: 'Success', sucess: 'true'})
       })  
@@ -111,14 +113,15 @@ async function insertNewFamilyRecipe(recipeDetails,id,res,username)
 async function insertUserRecipe(recipeDetails,id,res,username)
 {
     const {
-        name,
+        title,
         image,
-        time,
-        isGluten,
+        readyInMinutes,
+        glutenFree,
         isVegaterian,
         ingredients,
         instructions,
-        totalAmount
+        servings,
+        summary
       } = recipeDetails
   
       //Add new recipe to DB
@@ -126,15 +129,16 @@ async function insertUserRecipe(recipeDetails,id,res,username)
       result = await pool.request()
       .input("id",sql.VarChar(4000), id)
       .input("username",sql.VarChar(10), username)
-      .input("name",sql.VarChar(4000), name)
+      .input("title",sql.VarChar(4000), title)
       .input("image",sql.VarChar(4000), image)
-      .input("time",sql.BigInt, time)
-      .input("likes",sql.BigInt,0)
-      .input("isGluten", sql.Bit,isGluten==='true' ? 1 : 0)
-      .input("isVegaterian", sql.Bit,isVegaterian==='true' ? 1 : 0)
+      .input("readyInMinutes",sql.BigInt, readyInMinutes)
+      .input("aggregateLikes",sql.BigInt,0)
+      .input("glutenFree", sql.Bit,glutenFree==='true' ? 1 : 0)
+      .input("vegetarian", sql.Bit,isVegaterian==='true' ? 1 : 0)
       .input("ingredients", sql.NVarChar('max'), JSON.stringify(ingredients))
       .input("instructions", sql.NVarChar('max'), JSON.stringify(instructions))
-      .input("totalAmount", sql.NVarChar('max'), totalAmount)
+      .input("servings", sql.NVarChar('max'), servings)
+      .input("summary", sql.NVarChar(4000), summary)
       .execute("insertRecipe").then(function (recordSet){
         res.status(200).send({message: 'Success', sucess: 'true'})
      })  
