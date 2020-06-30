@@ -166,7 +166,6 @@ check('instructions', 'instructions must be not null').not().isEmpty()
 //@access Public
 router.get('/random', async function(req,res,next){
   try {
-   
       let instructionsEmpty=true;
       while(instructionsEmpty){
       var get_random = await axios.get(`${api_domain}/random`, {
@@ -177,7 +176,7 @@ router.get('/random', async function(req,res,next){
       });
       instructionsEmpty = get_random.data.recipes.some((recipe_raw) => recipe_raw==='')
     }
-    let randomRecipes = get_random.data.recipes.map((recipe_raw) => recipes_actions.createPreviewRecipe(recipe_raw))
+    let randomRecipes = get_random.data.recipes.map((recipe_raw) => recipes_actions.createPreviewRecipe(recipe_raw,'spooncalur'))
     res.status(200).send(randomRecipes);
     } 
     catch (err){
@@ -215,7 +214,7 @@ router.get("/search", async function(req,res,next) {
       
     //Convert to my pattern
     let convertedRecipes=[];
-    recipes.map((recipe) => convertedRecipes.push(recipes_actions.createPreviewRecipe(recipe.data)));
+    recipes.map((recipe) => convertedRecipes.push(recipes_actions.createPreviewRecipe(recipe.data,'spooncalur')));
     res.send(convertedRecipes);
     } 
   catch (err) {

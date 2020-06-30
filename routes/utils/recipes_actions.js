@@ -7,7 +7,7 @@ const db_actions = require('./db_actions')
 function createPreviewRecipe(recipeFromApi,type) {
     let recipe={}
     recipe.id=recipeFromApi.id
-    recipe.type=
+    recipe.type=type
     recipe.title=recipeFromApi.title
     recipe.readyInMinutes=recipeFromApi.readyInMinutes
     recipe.aggregateLikes=recipeFromApi.aggregateLikes
