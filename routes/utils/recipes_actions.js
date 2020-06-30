@@ -31,19 +31,20 @@ function createPreviewRecipe(recipeFromApi,type) {
     recipe.vegetarian=recipeFromApi.vegetarian
     recipe.servings=recipeFromApi.servings
     recipe.ingredients=[];
-    recipe.ingredients.push(recipeFromApi.extendedIngredients.map((ingredient) =>{
+    recipeFromApi.extendedIngredients.map((ingredient) =>{
       let newIngredient = {'name' : ingredient.name , 'unit' : ingredient.unit , 'amount' : ingredient.amount}
-      return newIngredient
-      }
-    ));
-    
+      recipe.ingredients.push(newIngredient)
+      })
+    console.log(recipe.ingredients)
     recipe.instructions=[]
-    recipe.instructions.push(recipeFromApi.analyzedInstructions[0].steps.map((instruction) =>{
-      return {
-        step: instruction.number,
-        instruction: instruction.step
-      }   
-    }))
+    recipeFromApi.analyzedInstructions[0].steps.map((instruction) =>{
+      let newInstruction = {
+        'step': instruction.number,
+        'instruction': instruction.step
+      }
+      recipe.instructions.push(newInstruction)
+    })   
+
     recipe.summary=recipeFromApi.summary;
     return recipe;
   }
