@@ -65,13 +65,11 @@ function getRecipeInfo(id) {
   async function addToFavorite(id,username,type,next,res) {
     try{
       profile = await db_actions.getProfile(username)
-
       if(!profile)
         return next(createError(404,'profile doesnt exists'))
       if(profile.recordset.length === 0){
         return next(createError(404,'profile doesnt exists'))
       }
-
       //check if already saved in favorites
       if(profile.recordset[0].favoriteRecipe.length===0)
         favoriteRecipe=[]
@@ -86,6 +84,7 @@ function getRecipeInfo(id) {
       //Check if the recipe is user or spoon api recipe 
         let newFavorite={'id':id, 'type': type }
         favoriteRecipe.push(newFavorite)
+        var pool = await poolPromise  
         await pool.request().query(`update profile set favoriteRecipe = '${JSON.stringify(favoriteRecipe)}' where username =  '${username}'`);
       
     }

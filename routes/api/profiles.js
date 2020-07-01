@@ -47,17 +47,17 @@ router.put('/favorite',auth,[check('id', 'must be not empty').not().isEmpty()],a
    
       const {id,type} = req.body;
       //Check if the recipe belong to user
-      if(type=='user')
+      if(type==='user'){
       await recipes_actions.addToFavorite(id,req.user,'user',next,res)
-
+      }
       //Check if the recipe belong to family
-      else if(type==='family')
+      else if(type==='family'){
       await recipes_actions.addToFavorite(id,req.user,'family',next,res)
-      
+      }
        //Check if this recipe is belong to API
-      else
+      else{
       await recipes_actions.addToFavorite(id,req.user,'spooncalur',next,res);
-      
+      }
  
       res.status(200).json({msg: "Recipe successfuly added" , success: 'true'}) 
 

@@ -206,7 +206,8 @@ async function getUserFamilySpesificRecipe(id,next)
 async function getUser(username,next)
 {
   try{
-    var pool = await poolPromise  
+    console.log('asda')
+    var pool = await poolPromise
     var result = await pool.request().query(`select * from users where username = '${username}'`)
     return result;
   }
@@ -220,9 +221,11 @@ async function getProfile(username,next)
   try{
     var pool = await poolPromise  
     var result = await pool.request().query(`select * from profile where username = '${username}'`)
+    console.log(result)
     return result;
   }
   catch(err){
+    console.log('111')
     next(err)
  }
 }

@@ -3,10 +3,12 @@ const connectDB = require('./config/db')
 const sessions = require("client-sessions")
 var bodyParser = require('body-parser')
 var cookieParser = require('cookie-parser');
+var morgan = require('morgan')
 var cors = require('cors');
 
 
 const app=express();
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms'))
 
 //Init Middleware
 const corsConfig = {
