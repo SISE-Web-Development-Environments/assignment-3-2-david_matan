@@ -62,7 +62,6 @@ router.put('/favorite',auth,[check('id', 'must be not empty').not().isEmpty()],a
       res.status(200).json({msg: "Recipe successfuly added" , success: 'true'}) 
 
    }
-}
    catch(error){
       next(error);
    }
