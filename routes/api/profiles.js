@@ -80,7 +80,7 @@ router.get('/lastwatch',auth, async function(req,res,next){
  
      var lastWatchRecipes=[]
      let userProfile = result.recordset[0]; 
-     let newone
+     let newone;
      //if there is last watch recipe so return preview
      if(userProfile.lastWatched!==''){
        userProfile.lastWatched= JSON.parse(userProfile.lastWatched)
@@ -95,7 +95,7 @@ router.get('/lastwatch',auth, async function(req,res,next){
            }
      //if else from user
           else if(recipeId.type==='user'){
-           result = await db_actions.getUserSpesificRecipe(req.params.id,next)
+           result = await db_actions.getUserSpesificRecipe(recipeId.id,next)
            recipe = result.recordset[0];
            preview=recipes_actions.createPreviewRecipe(recipe,'user')
            lastWatchRecipes.push(preview)
@@ -103,7 +103,7 @@ router.get('/lastwatch',auth, async function(req,res,next){
            }
       // else from family
            else
-           result = await db_actions.getUserFamilySpesificRecipe(req.params.id,next)
+           result = await db_actions.getUserFamilySpesificRecipe(recipeId.id,next)
            recipe = result.recordset[0];
            preview=recipes_actions.createPreviewRecipe(recipe,'family')
            lastWatchRecipes.push(preview)
