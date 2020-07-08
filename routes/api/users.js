@@ -52,7 +52,7 @@ router.post('/',[
         next(error);
     }
 
-//@route POST/api/users 
+//@route GET/api/users 
 //@desc create and register new user
 //@access Public
 
