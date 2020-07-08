@@ -21,7 +21,11 @@ router.get('/',auth, async function(req,res,next){
       recipes=await db_actions.getUserRecipes(req.user,next)
       if(!recipes)
         return next(createError(404,'Recipes doesnt exists'))
-      res.status(200).send({recipes});
+      let preview=[]
+      recipes.map((recipe) =>{
+      preview.push(recipes_actions.createPreviewRecipe(recipe,'user'))
+      })
+      res.status(200).send({preview});
   }
   catch (err){
     next(err);
@@ -93,8 +97,14 @@ router.get('/familyrecipes/:id',auth, async function(req,res,next){
 router.get('/familyrecipes',auth, async function(req,res,next){
   try {
       recipes=await db_actions.getFamilyRecipe(req.user,next)
-      res.status(200).send({recipes});
-  }
+      if(!recipes)
+      return next(createError(404,'Recipes doesnt exists'))
+      let preview=[]
+      recipes.map((recipe) =>{
+      preview.push(recipes_actions.createPreviewRecipe(recipe,'family'))
+      })
+        res.status(200).send({preview});
+    }
   catch (err) {
     next(err);
   }
