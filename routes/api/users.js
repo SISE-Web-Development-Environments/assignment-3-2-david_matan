@@ -1,6 +1,6 @@
 const express = require('express');
 const router=express.Router();
-
+const auth = require('../../middlewares/auth');
 const bcrypt = require ('bcryptjs');
 const createError = require('http-errors')
 const {check, validationResult} = require('express-validator')
@@ -51,12 +51,12 @@ router.post('/',[
     catch(error){
         next(error);
     }
-
+});
 //@route GET/api/users 
 //@desc create and register new user
 //@access Public
 
-router.get('/', async (req,res,next) =>{
+router.get('/', auth , async(req,res,next) =>{
 
     try{
         let result = await db_actions.getUser(req.session.userId)
@@ -70,5 +70,6 @@ router.get('/', async (req,res,next) =>{
         next(err)
     }
 })
-});
+
+
 module.exports = router;
