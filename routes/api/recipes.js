@@ -113,7 +113,7 @@ check('vegetarian', 'isVegaterian must be not empty and boolean').not().isEmpty(
 check('belongs', 'belongs must contain at leat 1 family member').not().isEmpty(),
 check('wichtime', 'wichtime must be not empty').not().isEmpty(),
 check('ingredients', 'ingredients must be not null').not().isEmpty(),
-check('serving', 'totalamount must be not null').not().isEmpty(),
+check('servings', 'serving must be not null').not().isEmpty(),
 check('instructions', 'instructions must be not null').not().isEmpty()
 ], async function(req,res,next){
   try{

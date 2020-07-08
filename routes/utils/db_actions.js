@@ -91,12 +91,12 @@ async function insertNewFamilyRecipe(recipeDetails,id,res,username)
       result = await pool.request()
       .input("id",sql.VarChar(4000), id)
       .input("username",sql.VarChar(10), username)
-      .input("name",sql.VarChar(4000), title)
+      .input("title",sql.VarChar(4000), title)
       .input("image",sql.VarChar(4000), image)
       .input("readyInMinutes",sql.BigInt, readyInMinutes)
       .input("aggregateLikes",sql.BigInt,0)
       .input("glutenFree", sql.Bit,glutenFree==='true' ? 1 : 0)
-      .input("isVegaterian", sql.Bit,vegetarian==='true' ? 1 : 0)
+      .input("vegetarian", sql.Bit,vegetarian==='true' ? 1 : 0)
       .input("belongs",sql.VarChar(4000), belongs)
       .input("wichtime",sql.VarChar(4000), wichtime)
       .input("generations",sql.Int,generations)
@@ -206,7 +206,6 @@ async function getUserFamilySpesificRecipe(id,next)
 async function getUser(username,next)
 {
   try{
-    console.log('asda')
     var pool = await poolPromise
     var result = await pool.request().query(`select * from users where username = '${username}'`)
     return result;
