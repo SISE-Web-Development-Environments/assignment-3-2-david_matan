@@ -59,8 +59,7 @@ router.post('/',[
 router.get('/', async (req,res,next) =>{
 
     try{
-        let result = await db_actions.getUser(username)
-        console.log(result)
+        let result = await db_actions.getUser(req.query.username)
         if(result.recordset.length === 0)
             return  next(createError(400,'Username is not exists'));
         else{
