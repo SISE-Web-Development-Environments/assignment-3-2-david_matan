@@ -52,6 +52,24 @@ router.post('/',[
         next(error);
     }
 
-      
+//@route POST/api/users 
+//@desc create and register new user
+//@access Public
+
+router.get('/', async (req,res,next) =>{
+
+    try{
+        let result = await db_actions.getUser(username)
+        console.log(result)
+        if(result.recordset.length === 0)
+            return  next(createError(400,'Username is not exists'));
+        else{
+        return res.status(200).json(result.recordset[0])
+        }
+    }
+    catch(err){
+        next(err)
+    }
+})
 });
 module.exports = router;

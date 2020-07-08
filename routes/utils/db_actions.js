@@ -221,7 +221,6 @@ async function getProfile(username,next)
   try{
     var pool = await poolPromise  
     var result = await pool.request().query(`select * from profile where username = '${username}'`)
-    console.log(result)
     return result;
   }
   catch(err){
