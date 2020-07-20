@@ -243,7 +243,6 @@ router.get('/:id',auth, async function(req,res,next){
     await update_watch.updateLastWatchRecipe(req.user,req.params.id,'api',next)
     //Save the recipe in lastWatched recipes
     await update_watch.updateWatchHistoryRecipes(req.user,req.params.id,'api',next)
-
     res.send(reqRecipe)
     
   } 

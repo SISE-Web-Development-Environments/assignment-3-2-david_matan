@@ -53,8 +53,8 @@ router.post('/',[
     }
 });
 //@route GET/api/users 
-//@desc create and register new user
-//@access Public
+//@desc get user details
+//@access Private
 
 router.get('/', auth , async(req,res,next) =>{
 

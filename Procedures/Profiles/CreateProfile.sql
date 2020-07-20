@@ -9,7 +9,6 @@ CREATE TABLE profile
     username [VARCHAR](10) NOT NULL PRIMARY KEY, -- primary key column
     watchedRecipe [VARCHAR](4000) ,
     favoriteRecipe [VARCHAR](4000),
-    familyRecipe [VARCHAR](4000),
     lastWatched [VARCHAR](4000)
     -- specify more columns here
 );

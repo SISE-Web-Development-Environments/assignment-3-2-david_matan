@@ -35,7 +35,6 @@ function createPreviewRecipe(recipeFromApi,type) {
       let newIngredient = {'name' : ingredient.name , 'unit' : ingredient.unit , 'amount' : ingredient.amount}
       recipe.ingredients.push(newIngredient)
       })
-    console.log(recipe.ingredients)
     recipe.instructions=[]
     recipeFromApi.analyzedInstructions[0].steps.map((instruction) =>{
       let newInstruction = {

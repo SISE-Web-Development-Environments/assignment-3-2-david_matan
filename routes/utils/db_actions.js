@@ -47,7 +47,6 @@ async function insertProfile(req,username,next)
 {
     try{
     //find the user
-    console.log(username)
     var pool = await poolPromise  
     var result = await pool.request().query(`select * from users where username='${username}'`);
     let data = result.recordset;
@@ -58,7 +57,6 @@ async function insertProfile(req,username,next)
     .input("username",sql.VarChar(10), username)
     .input("watchedRecipe",sql.VarChar('max'),[])
     .input("favoriteRecipe",sql.VarChar(4000), [])
-    .input("familyRecipe",sql.VarChar(4000), [])
     .input("lastWatched",sql.VarChar(4000), [])
     .execute("insertProfile")
     
@@ -105,7 +103,7 @@ async function insertNewFamilyRecipe(recipeDetails,id,res,username)
       .input("servings", sql.NVarChar('max'), servings)
       .input("summary", sql.NVarChar(4000), summary)
       .execute("insertFamilyRecipe").then(function (recordSet){
-      res.status(200).send({message: 'Success', sucess: 'true'})
+      res.status(200).send({message: 'Succsefully created a new recipe', sucess: 'true'})
       })  
 }
 
@@ -140,7 +138,7 @@ async function insertUserRecipe(recipeDetails,id,res,username)
       .input("servings", sql.NVarChar('max'), servings)
       .input("summary", sql.NVarChar(4000), summary)
       .execute("insertRecipe").then(function (recordSet){
-        res.status(200).send({message: 'Success', sucess: 'true'})
+        res.status(200).send({message: 'Succsefully created a new recipe', sucess: 'true'})
      })  
 }
 
@@ -148,7 +146,6 @@ async function getFamilyRecipe(username,next)
 {
   try{
     pool = await poolPromise  
-    console.log(username)
     result = await pool.request().query(`select * from familyrecipes where username =  '${username}'`)
     if(result.recordset.length==0){
       next(createError(404,'Recipes doesnt exists'))
@@ -165,7 +162,6 @@ async function getUserRecipes(username,next)
 {
   try{
     pool = await poolPromise  
-    console.log(username)
     result = await pool.request().query(`select * from recipes where username =  '${username}'`)
     if(result.recordset.length==0){
       next(createError(404,'Recipes doesnt exists'))
@@ -223,7 +219,6 @@ async function getProfile(username,next)
     return result;
   }
   catch(err){
-    console.log('111')
     next(err)
  }
 }
