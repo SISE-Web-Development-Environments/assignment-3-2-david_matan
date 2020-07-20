@@ -184,7 +184,7 @@ router.get('/random', async function(req,res,next){
           apiKey: process.env.spooncular_API
         }
       });
-      instructionsEmpty = get_random.data.recipes.some((recipe_raw) => recipe_raw==='')
+      instructionsEmpty = get_random.data.recipes.some((recipe_raw) => recipe_raw.instructions==="")
     }
     let randomRecipes = get_random.data.recipes.map((recipe_raw) => recipes_actions.createPreviewRecipe(recipe_raw,'spooncalur'))
     res.status(200).send(randomRecipes);
